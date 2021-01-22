@@ -13,16 +13,12 @@ int main()
     pthread_t newThread4;
 
     pthread_create(&newThread1, NULL, antiSound_multithread_helloWorld, NULL);
-    printf("newThread1 %ld\n", pthread_self());
 
     pthread_create(&newThread2, NULL, antiSound_multithread_helloWorld, NULL);
-    printf("newThread2 %ld\n", pthread_self());
     
     pthread_create(&newThread3, NULL, antiSound_multithread_helloWorld, NULL);
-    printf("newThread3 %ld\n", pthread_self());
 
     pthread_create(&newThread4, NULL, antiSound_multithread_helloWorld, NULL);
-    printf("newThread4 %ld\n", pthread_self());
 
     pthread_join(newThread1, NULL);
     pthread_join(newThread2, NULL);
@@ -34,6 +30,7 @@ int main()
 
 void* antiSound_multithread_helloWorld(void* value)
 {
+    printf("newThread %ld\n\n", pthread_self());
     printf("Hello World\n");
 
     return NULL;
