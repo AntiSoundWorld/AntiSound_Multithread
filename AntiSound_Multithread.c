@@ -24,20 +24,27 @@ int main()
     int namThreads;
     scanf("%d", &namThreads);
     
-    int i = 1;
+    datas_t* datas = malloc(sizeof(datas_t));
+    datas->word = data;
+    datas->book = book;
+    
+    int i = 0;
 
     pthread_t threads[16];
 
-    while (i <= namThreads)
+    while (i != namThreads)
     {
         pthread_t thread;
 
         threads[i] = thread;
         
-        pthread_create(&thread, NULL, calculateWords(book, data), NULL);
+        pthread_create(&thread, NULL, calculateWords, datas);
         pthread_join(threads[i], NULL);
         i++;
     }
+
+    //pthread_join(threads[1], NULL);
+
 }
 
 int findWord(FILE* book, char* word)
@@ -74,11 +81,13 @@ int findWord(FILE* book, char* word)
     return sum;
 }
 
-void* calculateWords(FILE* book, char* word)
+void* calculateWords(void* datas)
 {
-    printf("%ld\n", pthread_self());
+    printf("id[%ld]\n", pthread_self());
 
-    printf("%d\n", findWord(book, word));
+    datas_t* data = datas;
+
+    printf("num - %d\n\n", findWord(data->book, data->word));
     
     return NULL;
 }
