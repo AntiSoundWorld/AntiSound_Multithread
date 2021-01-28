@@ -28,19 +28,17 @@ int main()
     datas->word = data;
     datas->book = book;
     
-    //calculateWords(datas);
     int i = 0;
     
+    pthread_t thread;
+
     while (i != namThreads)
     {
-        pthread_t thread;
-
         pthread_create(&thread, NULL, calculateWords, datas);
-        pthread_join(thread, NULL);
         i++;
     }
 
-    //pthread_join(threads[1], NULL);
+    pthread_join(thread, NULL);
 }
 
 int findWord(FILE* book, char* word)
