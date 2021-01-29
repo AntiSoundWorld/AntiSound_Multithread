@@ -48,9 +48,10 @@ int main()
 
         pointer = pointer->next;
 
-        pthread_join(thread, NULL);
     }
-
+    
+    pthread_join(thread, NULL);
+    
     pointer = part; 
     while (pointer != NULL)
     {
