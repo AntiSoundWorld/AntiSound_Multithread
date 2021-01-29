@@ -22,35 +22,54 @@ int main()
     scanf("%s", data);
 
     printf("insert num of threads\n");
-    int namThreads;
-    scanf("%d", &namThreads);
+    int numThreads;
+    scanf("%d", &numThreads);
 
     char* text = copyText(book);
 
     datas_t* datas = malloc(sizeof(datas_t));
     datas->word = data;
     
-    pthread_t thread;
-
-    splitter_t* part = splitText(text, namThreads);
+    splitter_t* part = splitText(text, numThreads);
     splitter_t* pointer = part;
 
     pointer = pointer->next;
 
-    pthread_t threadTimer;
-    pthread_create(&threadTimer, NULL, timer, NULL);
+    //pthread_t threadTimer;
+    //pthread_create(&threadTimer, NULL, timer, NULL);
 
-    while (pointer != NULL)
+    pthread_t threads[numThreads];
+    threads[0] = '\0';
+
+    int i = 0;
+
+    int start = clock();
+    while (i != numThreads)
     {
+        pthread_t thread;
+        threads[i] = thread;
+
+        printf("length %ld\n", strlen(pointer->data));
+
         datas->text = pointer->data;
 
         pthread_create(&thread, NULL, calculateWords, datas);
 
         pointer = pointer->next;
-
+        i++;
     }
-    
-    pthread_join(thread, NULL);
+
+    int j = 0;
+
+    while (j != i)
+    {
+        pthread_join(threads[j], NULL);
+        j++;
+    }
+    int end = clock();
+
+    int timer = end - start;
+    printf("timer %d\n", timer);
     
     pointer = part; 
     while (pointer != NULL)
@@ -68,13 +87,12 @@ int main()
 
 int findWord(char* text, char* word)
 {
-
     char* searchWord = calloc(265, sizeof(char));
 
-    int sum = 0;
+    int result = 0;
     int i = 0;
-
     int j = 0;
+
     while(text[j] != '\0')
     {
         if(text[j] != ' ' && text[j] != -1 && text[j] != '\n')
@@ -86,7 +104,7 @@ int findWord(char* text, char* word)
         {
             if(isWordExist(searchWord, word))
             {
-                sum = sum + 1;
+                result = result + 1;
             }
             
             searchWord = reset(searchWord);
@@ -99,14 +117,13 @@ int findWord(char* text, char* word)
 
     free(searchWord);
     printf("id[%ld]\n", pthread_self());
-    printf("sum [%d]\n", sum);
+    printf("result [%d]\n", result);
 
-    return sum;
+    return result;
 }
 
 void* calculateWords(void* datas)
 {
-
     datas_t* data = datas;
     
     findWord(data->text, data->word);
@@ -122,14 +139,14 @@ char* reset(char* data)
 
 bool isWordExist(char* data, char* word)
 {
-    bool isWordExist = false;
+    bool isСoincidenceExist = false;
 
     if(strcmp(data, word) == 0)
     {
-        isWordExist = true;
+        isСoincidenceExist = true;
     }
 
-    return isWordExist;
+    return isСoincidenceExist;
 }
 
 char* copyText(FILE* book)
@@ -158,12 +175,12 @@ splitter_t* splitText(char* text, int quantity)
 {
     size_t sizeOftext = strlen(text);
 
-    int sum = sizeOftext / quantity;
+    int result = sizeOftext / quantity;
 
     int i = 0;
     int j = 0;
 
-    char* buffer = calloc(sum, sizeof(char));
+    char* buffer = calloc(result, sizeof(char));
 
     splitter_t* part = malloc(sizeof(splitter_t));
 
@@ -171,7 +188,7 @@ splitter_t* splitText(char* text, int quantity)
 
     while (true)
     {
-        if(j == sum)
+        if(j == result)
         {
             pointer->next = malloc(sizeof(splitter_t));
 
@@ -181,7 +198,7 @@ splitter_t* splitText(char* text, int quantity)
             pointer->next->next = NULL;
 
             free(buffer);
-            buffer = calloc(sum, sizeof(char));
+            buffer = calloc(result, sizeof(char));
 
             j = 0;
             
@@ -201,37 +218,4 @@ splitter_t* splitText(char* text, int quantity)
     
     free(buffer);
     return part;
-}
-
-void* timer()
-{
-    int start, end;
-    int ms= 0;
-    int ns= 0;
-    int sec=0 , min=0 , hrs=0;
-    start = clock ();
-
-    while (true)
-    {
-        end = clock ();
-        ns= end - start;
-        ms = ns / 10;
-        if (ms>100)
-        {
-            sec = sec + 1; 
-            ms= ms - 100;
-            start= end;
-        }
-        if (sec > 59)
-        {
-            min = min+1;
-            sec= 0;
-        }
-        if (min > 59)
-        {
-            hrs = hrs + 1;
-            min=0;
-        }
-        printf ("%d:%d:%d.%d\n",hrs, min, sec, ms );
-    }
 }
