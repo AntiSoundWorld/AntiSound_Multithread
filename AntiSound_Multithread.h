@@ -16,16 +16,9 @@ typedef struct Datas
 }datas_t;
 
 
-int findWord(char* text, char* word);
+splitter_t* splitBook(FILE* book, int quantityOfParts);
 
-void* calculateWords(void* datas);
+splitter_t* initializeSplitter();
 
-bool isWordExist(char* data, char* word);
+datas_t* initializeDatas();
 
-char* copyText(FILE* book);
-
-splitter_t* splitText(char* text, int quantity);
-
-char* reset(char* data);
-
-void* timer();
