@@ -43,3 +43,5 @@ void check(splitter_t* data, char* word);
 datas_t* initializedDatas();
 
 void showWords(word_t* words);
+
+void info(int numOfIdentyWords);

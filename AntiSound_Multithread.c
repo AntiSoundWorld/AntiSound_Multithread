@@ -17,16 +17,16 @@ int main()
         printf("NULL\n");
     }
 
-    char data[80] = "\0";
+    char searchWord[80] = "\0";
     printf("insert a word\n");
-    scanf("%s", data);
+    scanf("%s", searchWord);
     
     printf("insert num of threads\n");
     int numThreads;
     scanf("%d", &numThreads);
 
     datas_t* datas = initializedDatas();
-    datas->searchWord = data;
+    datas->searchWord = searchWord;
 
     splitter_t* splittedBook = splitBook(copyText(book), numThreads);
     splitter_t* pointer = splittedBook;
@@ -55,7 +55,6 @@ int main()
         pthread_join(threads[pointer->page], NULL);
        
         pointer = pointer->next;
-
     }
 }
 
@@ -181,7 +180,6 @@ void* getNumOfIdentyWords(void* datas)
 
     while (pointerWords != NULL)
     {
-        //printf("%s\n", pointerWords->word);
 
         if(strcmp(pointerWords->word, pointer->searchWord) == 0)
         {
@@ -191,9 +189,7 @@ void* getNumOfIdentyWords(void* datas)
         pointerWords = pointerWords->next;
     }
 
-    printf("\ntread id[%ld]\n", pthread_self());
-    printf("numOfIdentyWords [%d]\n", numOfIdentyWords);
-    printf("----------------------------------------\n");
+    info(numOfIdentyWords);
 
     return NULL;
 }
@@ -281,4 +277,15 @@ void showWords(word_t* words)
     }
     //printf("------------------\n");
 
+}
+
+pthread_mutex_t mutex;
+
+void info(int numOfIdentyWords)
+{
+    pthread_mutex_lock(&mutex);
+    printf("\ntread id[%ld]\n", pthread_self());
+    printf("numOfIdentyWords [%d]\n", numOfIdentyWords);
+    printf("----------------------------------------\n");
+    pthread_mutex_unlock(&mutex);
 }
