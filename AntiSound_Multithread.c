@@ -10,7 +10,7 @@
 
 int main()
 {
-    FILE* book = fopen("Test.txt", "rt");
+    FILE* book = fopen("War and Peace.txt", "rt");
 
     if(book == NULL)
     {
@@ -34,6 +34,7 @@ int main()
     pthread_t threads[numThreads];
 
     int i = 0;
+    int start = clock();
     while (pointer != NULL)
     {
         datas->words = pointer->words;
@@ -56,6 +57,12 @@ int main()
        
         pointer = pointer->next;
     }
+
+    int end = clock();
+    int time = end - start;
+
+    printf("time:[%d]\n", time);
+    sleep(1);
 }
 
 char* copyText(FILE* book)
@@ -65,7 +72,18 @@ char* copyText(FILE* book)
     fseek(book, 0L, SEEK_SET);
 
     char* text = calloc(length + 1, sizeof(char));
-    fgets(text, length, book);
+    
+    char buffer;
+
+    int i = 0;
+    while (buffer != EOF)
+    {
+        buffer = fgetc(book);
+        text[i] = buffer;
+        i++;
+    }
+    
+    //fgets(text, length, book);
     
     return text;
 }
@@ -213,7 +231,8 @@ word_t* splitWords(char* words)
 
     while (i <= sizeOfWords)
     {
-        if(words[i] != ' ' && words[i] != '.' && words[i] != ',')
+        //printf("%c", words[i]);
+        if(words[i] != ' ' && words[i] != '.' && words[i] != ',' && words[i] != '\n')
         {
             buffer[j] = words[i];
             j++;
@@ -272,7 +291,7 @@ void showWords(word_t* words)
 
     while(pointer != NULL)
     {
-        printf("word = %s\n", pointer->word);
+        //printf("word = %s\n", pointer->word);
         pointer = pointer->next;
     }
     //printf("------------------\n");

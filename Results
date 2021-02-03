@@ -1,0 +1,15 @@
+ 1 thread:
+ time = 12495 
+ 
+ 2 thread:
+ time = 13781
+ 
+ 4 thread:
+ time = 14284
+
+ 
+ 8 thread:
+ time = 16234
+    
+ 16 thread
+ time = 16635
