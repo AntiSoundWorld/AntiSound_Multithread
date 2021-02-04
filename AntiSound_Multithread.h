@@ -18,15 +18,23 @@ typedef struct Splitter
 
 typedef struct Datas
 {
+    splitter_t* splittedBook;
     char* searchWord;
     word_t* words;
 }datas_t;
+
+typedef struct LoadingBarData
+{
+    int numOfWords;
+}loadingBarData_t;
 
 splitter_t* splitBook(char* text, int quantityOfParts);
 
 splitter_t* initializeSplitter();
 
 word_t* initializeWords();
+
+loadingBarData_t* initializeLoadingBarData();
 
 char* copyText(FILE* book);
 
@@ -42,6 +50,10 @@ void check(splitter_t* data, char* word);
 
 datas_t* initializedDatas();
 
-void showWords(word_t* words);
-
 void info(int numOfIdentyWords);
+
+void* loadingBar();
+
+int getNumOfWords(splitter_t* splittedBook);
+
+void calculatingNumOfWords();

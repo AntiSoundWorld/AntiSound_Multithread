@@ -8,9 +8,12 @@
 #include <stdio.h>
 #include <time.h>
 
+static int numofFoundedWords = 0;
+pthread_t threadOfLoadingBar;
+
 int main()
 {
-    FILE* book = fopen("War and Peace.txt", "rt");
+    FILE* book = fopen("Test.txt", "rt");
 
     if(book == NULL)
     {
@@ -31,6 +34,14 @@ int main()
     splitter_t* splittedBook = splitBook(copyText(book), numThreads);
     splitter_t* pointer = splittedBook;
 
+    datas->splittedBook = splittedBook;
+
+    loadingBarData_t* loadingBarData = initializeLoadingBarData();
+
+    loadingBarData->numOfWords = getNumOfWords(splittedBook);
+
+    pthread_create(&threadOfLoadingBar, NULL, loadingBar, loadingBarData);
+
     pthread_t threads[numThreads];
 
     int i = 0;
@@ -44,7 +55,7 @@ int main()
 
         pthread_create(&thread, NULL, getNumOfIdentyWords, datas);
         printf("\npage[%d]\n\n", pointer->page);
-        showWords(pointer->words);
+        //showWords(pointer->words);
 
         pointer = pointer->next;
         i++;
@@ -57,6 +68,7 @@ int main()
        
         pointer = pointer->next;
     }
+
 
     int end = clock();
     int time = end - start;
@@ -116,7 +128,7 @@ splitter_t* splitBook(char* text, int quantityOfParts)
 
         while (true)
         {
-            if(text[point] == ' ' || text[point] == ',' || text[point] == '.' || text[point] == '\0')
+            if(text[point] == ' ' || text[point] == ',' || text[point] == '.' || text[point] == '\0' || text[point] == '\n')
             {
                 break;
             }
@@ -196,16 +208,19 @@ void* getNumOfIdentyWords(void* datas)
     datas_t* pointer = datas;
     word_t* pointerWords = pointer->words;
 
+
     while (pointerWords != NULL)
     {
-
         if(strcmp(pointerWords->word, pointer->searchWord) == 0)
         {
             numOfIdentyWords = numOfIdentyWords + 1;
         }
 
+        numofFoundedWords = numofFoundedWords + 1;
+
         pointerWords = pointerWords->next;
     }
+
 
     info(numOfIdentyWords);
 
@@ -253,6 +268,28 @@ word_t* splitWords(char* words)
     return word;
 }
 
+
+int getNumOfWords(splitter_t* splittedBook)
+{
+    int numWords = 0;
+    splitter_t* pointerSplittedBook = splittedBook;
+
+    while(pointerSplittedBook != NULL)
+    {
+        word_t* pointerWords = pointerSplittedBook->words;
+        while (pointerWords != NULL)
+        {
+            numWords = numWords + 1;
+            pointerWords = pointerWords->next;
+        }
+
+        pointerSplittedBook = pointerSplittedBook->next;
+    }
+
+    return numWords;
+}
+
+
 void addData(word_t* structure, char* buffer)
 {  
     word_t* pointer = structure;
@@ -276,6 +313,14 @@ void addData(word_t* structure, char* buffer)
     }
 }
 
+loadingBarData_t* initializeLoadingBarData()
+{
+    loadingBarData_t* loadingBar = malloc(sizeof(loadingBarData_t));
+    loadingBar->numOfWords = -1;
+
+    return loadingBar;
+}
+
 datas_t* initializedDatas()
 {
     datas_t* datas = malloc(sizeof(datas_t));
@@ -291,10 +336,9 @@ void showWords(word_t* words)
 
     while(pointer != NULL)
     {
-        //printf("word = %s\n", pointer->word);
+        printf("word = %s\n", pointer->word);
         pointer = pointer->next;
     }
-    //printf("------------------\n");
 
 }
 
@@ -307,4 +351,86 @@ void info(int numOfIdentyWords)
     printf("numOfIdentyWords [%d]\n", numOfIdentyWords);
     printf("----------------------------------------\n");
     pthread_mutex_unlock(&mutex);
+}
+
+void* loadingBar(int numOfWords)
+{
+    int ten = numOfWords / 10;
+
+    int twenty = ten + ten;
+    int thirty = ten + twenty;
+    int fourty = ten + thirty;
+    int fifty = ten + fourty;
+    int sixty = ten + fifty;
+    int seventy = ten + sixty;
+    int eighty = ten + seventy;
+    int ninty = ten + eighty;
+    int houndred = numOfWords;
+
+    while (true)
+    {
+        if(numofFoundedWords ==  ten)
+        {
+            printf("10");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == twenty)
+        {
+            printf("20");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == thirty)
+        {
+            printf("30");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == fourty)
+        {
+            printf("40");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == fifty)
+        {
+            printf("50");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == sixty)
+        {
+            printf("60");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == seventy)
+        {
+            printf("70");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == eighty)
+        {
+            printf("80");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == ninty)
+        {
+            printf("90");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords == houndred)
+        {
+            printf("100");
+            fflush(stdout);
+            break;
+        }
+
+    }
+
+    return NULL;
 }
