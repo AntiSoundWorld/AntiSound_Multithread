@@ -13,7 +13,7 @@ pthread_t threadOfLoadingBar;
 
 int main()
 {
-    FILE* book = fopen("Test.txt", "rt");
+    FILE* book = fopen("War and Peace.txt", "rt");
 
     if(book == NULL)
     {
@@ -32,6 +32,8 @@ int main()
     datas->searchWord = searchWord;
 
     splitter_t* splittedBook = splitBook(copyText(book), numThreads);
+    printf("Finish split book\n");
+
     splitter_t* pointer = splittedBook;
 
     datas->splittedBook = splittedBook;
@@ -68,6 +70,8 @@ int main()
        
         pointer = pointer->next;
     }
+
+    pthread_join(threadOfLoadingBar, NULL);
 
 
     int end = clock();
@@ -429,7 +433,7 @@ void* loadingBar(int numOfWords)
             fflush(stdout);
             break;
         }
-
+        
     }
 
     return NULL;
