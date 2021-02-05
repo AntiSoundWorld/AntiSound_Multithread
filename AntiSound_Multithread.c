@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <time.h>
 
-static int numofFoundedWords = 0;
+int numofFoundedWords = 0;
 pthread_t threadOfLoadingBar;
 
 int main()
@@ -20,59 +20,20 @@ int main()
         printf("NULL\n");
     }
 
-    char searchWord[80] = "\0";
-    printf("insert a word\n");
-    scanf("%s", searchWord);
-    
-    printf("insert num of threads\n");
-    int numThreads;
-    scanf("%d", &numThreads);
-
     datas_t* datas = initializedDatas();
-    datas->searchWord = searchWord;
 
-    splitter_t* splittedBook = splitBook(copyText(book), numThreads);
+    datas->info = getInfo(); 
+
+    datas->splittedBook = splitBook(copyText(book), datas->info->numOfThreads);
     printf("Finish split book\n");
-
-    splitter_t* pointer = splittedBook;
-
-    datas->splittedBook = splittedBook;
 
     loadingBarData_t* loadingBarData = initializeLoadingBarData();
 
-    loadingBarData->numOfWords = getNumOfWords(splittedBook);
-
-    pthread_create(&threadOfLoadingBar, NULL, loadingBar, loadingBarData);
-
-    pthread_t threads[numThreads];
-
-    int i = 0;
+    loadingBarData->numOfWords = getNumOfWords(datas->splittedBook);
+    
     int start = clock();
-    while (pointer != NULL)
-    {
-        datas->words = pointer->words;
 
-        pthread_t thread;
-        threads[pointer->page] = thread;
-
-        pthread_create(&thread, NULL, getNumOfIdentyWords, datas);
-        printf("\npage[%d]\n\n", pointer->page);
-        //showWords(pointer->words);
-
-        pointer = pointer->next;
-        i++;
-    }
-
-    pointer = splittedBook;
-    while (pointer != NULL)
-    {
-        pthread_join(threads[pointer->page], NULL);
-       
-        pointer = pointer->next;
-    }
-
-    pthread_join(threadOfLoadingBar, NULL);
-
+    antiSound_lounchThreads(loadingBarData, datas);
 
     int end = clock();
     int time = end - start;
@@ -212,10 +173,14 @@ void* getNumOfIdentyWords(void* datas)
     datas_t* pointer = datas;
     word_t* pointerWords = pointer->words;
 
-
     while (pointerWords != NULL)
     {
-        if(strcmp(pointerWords->word, pointer->searchWord) == 0)
+        if(pointer->words == NULL)
+        {
+            printf("pointer->words = NULL");
+        }
+
+        if(strcmp(pointerWords->word, pointer->info->searchWord) == 0)
         {
             numOfIdentyWords = numOfIdentyWords + 1;
         }
@@ -225,8 +190,9 @@ void* getNumOfIdentyWords(void* datas)
         pointerWords = pointerWords->next;
     }
 
+    pointer->numOfIdentyWords = numOfIdentyWords;
 
-    info(numOfIdentyWords);
+    showInfo(datas);
 
     return NULL;
 }
@@ -348,18 +314,28 @@ void showWords(word_t* words)
 
 pthread_mutex_t mutex;
 
-void info(int numOfIdentyWords)
+void showInfo(void* data)
 {
+    datas_t* datas = data;
+
     pthread_mutex_lock(&mutex);
+    printf("\npage[%d]\n\n", datas->splittedBook->page);
+
     printf("\ntread id[%ld]\n", pthread_self());
-    printf("numOfIdentyWords [%d]\n", numOfIdentyWords);
+    printf("numOfIdentyWords [%d]\n", datas->numOfIdentyWords);
     printf("----------------------------------------\n");
     pthread_mutex_unlock(&mutex);
 }
 
-void* loadingBar(int numOfWords)
+void* loadingBar(void* data)
 {
-    int ten = numOfWords / 10;
+    loadingBarData_t* loadingBar = data;
+    printf("LoadingBar\n");
+    printf("%d\n", loadingBar->numOfWords);
+
+    printf("%d\n", numofFoundedWords);
+
+    int ten = loadingBar->numOfWords / 10;
 
     int twenty = ten + ten;
     int thirty = ten + twenty;
@@ -369,72 +345,109 @@ void* loadingBar(int numOfWords)
     int seventy = ten + sixty;
     int eighty = ten + seventy;
     int ninty = ten + eighty;
-    int houndred = numOfWords;
+
+    int houndred = ten + ninty;
+
 
     while (true)
     {
-        if(numofFoundedWords ==  ten)
+        if(numofFoundedWords ==  0)
+        {
+            printf("0");
+            fflush(stdout);
+        }
+
+        if(numofFoundedWords <=  ten)
         {
             printf("10");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == twenty)
+        if(numofFoundedWords <= twenty)
         {
             printf("20");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == thirty)
+        if(numofFoundedWords <= thirty)
         {
             printf("30");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == fourty)
+        if(numofFoundedWords <= fourty)
         {
             printf("40");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == fifty)
+        if(numofFoundedWords <= fifty)
         {
             printf("50");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == sixty)
+        if(numofFoundedWords <= sixty)
         {
             printf("60");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == seventy)
+        if(numofFoundedWords <= seventy)
         {
             printf("70");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == eighty)
+        if(numofFoundedWords <= eighty)
         {
             printf("80");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == ninty)
+        if(numofFoundedWords <= ninty)
         {
             printf("90");
             fflush(stdout);
         }
 
-        if(numofFoundedWords == houndred)
+        if(numofFoundedWords <= houndred)
         {
             printf("100");
             fflush(stdout);
             break;
         }
-        
+
+        printf("=");
+        fflush(stdout);
     }
 
     return NULL;
+}
+
+info_t* initializeInfo()
+{
+    info_t* info = malloc(sizeof(info_t));
+    info->numOfThreads = 0;
+    info->searchWord = NULL;
+
+    return info;
+}
+
+info_t* getInfo()
+{
+    info_t* info = initializeInfo();
+    char searchWord[80] = "\0";
+    printf("insert a word\n");
+    scanf("%s", searchWord);
+
+    info->searchWord = calloc(strlen(searchWord) + 1, sizeof(char));
+    strncat(info->searchWord, searchWord, strlen(searchWord));
+    
+    printf("insert num of threads\n");
+    int numThreads;
+    scanf("%d", &numThreads);
+    info->numOfThreads = numThreads;
+
+    return info;
 }
